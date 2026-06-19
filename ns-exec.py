@@ -9,7 +9,7 @@ import pwd
 CONFIG_PATH = "/etc/userns-guard/whitelist.json"
 
 def hashPath(bin_path):
-    """Calculates the SHA-256 hash of a file by reading it in secure blocks."""
+    """Calculates the SHA-256 hash of a file by reading it in secure blocks"""
     hash_sha256 = hashlib.sha256()
     try:
         with open(bin_path, "rb") as f:
@@ -21,7 +21,7 @@ def hashPath(bin_path):
         sys.exit(1)
 
 def loadWhiteList():
-    """Safely loads the protected JSON whitelist file."""
+    """Safely loads the protected JSON whitelist file"""
     try:
         with open(CONFIG_PATH, "r") as f:
             return json.load(f)
@@ -30,7 +30,7 @@ def loadWhiteList():
         sys.exit(1)
 
 def saveWhiteList(data):
-    """Saves the whitelist updates."""
+    """Saves the whitelist updates"""
     try:
         with open(CONFIG_PATH, "w") as f:
             json.dump(data, f, indent=2)
@@ -41,12 +41,11 @@ def saveWhiteList(data):
 def loadProfileArmor(profile, path):
     """
     Dynamically generates the AppArmor profile and injects it into the kernel.
-    Uses a pipe to apparmor_parser's stdin to reduce the attack surface
-    by avoiding residual temporary files in /tmp.
+    Uses a pipe to apparmor_parser's stdin
     """
-    # Add the tunables include in the global scope (before defining the profile)
-    # Keep only abstractions/base for base system calls
+
     aa_profile = f"""
+    
     #include <tunables/global>
 
     profile guard_{profile} {path} flags=(attach_disconnected) {{
@@ -61,7 +60,6 @@ def loadProfileArmor(profile, path):
     """
     
     try:
-        # Remember: we pass only ["apparmor_parser", "-r"] to read natively from stdin
         process = subprocess.Popen(
             ["apparmor_parser", "-r"], 
             stdin=subprocess.PIPE, 
@@ -73,16 +71,15 @@ def loadProfileArmor(profile, path):
         if process.returncode != 0:
             print(f"[-] Error loading AppArmor profile into Kernel: {stderr}")
             sys.exit(1)
-        print(f"[+] AppArmor profile 'guard_{profile}' successfully injected.")
+        print(f"[+] AppArmor profile 'guard_{profile}' successfully injected")
     except Exception as e:
         print(f"[-] Failure in the AppArmor subsystem: {e}")
         sys.exit(1)
 
 def safeExecution(bin_path, args):
     """
-    Privilege Separation and Environment Sanitization:
-    Drops ROOT permissions by reverting to the original UID/GID and corrects
-    shared environment variables to prevent context leaks.
+    Drops root permissions by reverting to the original UID/GID and corrects
+    shared environment variables
     """
     sudo_uid = os.environ.get("SUDO_UID")
     sudo_gid = os.environ.get("SUDO_GID")
@@ -120,7 +117,7 @@ def safeExecution(bin_path, args):
     os.execve(bin_path, [bin_path] + args, clean_env)
 
 if __name__ == "__main__":
-    # Validate base authentication (Must be invoked with sudo)
+    # Validate base authentication
     if os.geteuid() != 0:
         print("[-] Authentication Error: This program requires Administrator privileges.")
         print("Usage: sudo yourProgram <path_to_binary> [arguments]")
@@ -157,10 +154,8 @@ if __name__ == "__main__":
             
     elif white_list[path] != calculated_hash:
         # Scenario 2: Tampering attack or legitimate Update
-        print(f"[🚨] SECURITY ALERT: The binary hash has changed!")
-        print(f"Expected: {white_list[path]}")
-        print(f"Calculated: {calculated_hash}")
-        print("[*] If this is due to an Ubuntu software update, confirm the change.")
+        print(f"[-] SECURITY ALERT: The binary hash has changed!")
+        print("[!] If this is due to an Ubuntu software update, confirm the change.")
         
         # Since we already guaranteed it is running under sudo, interaction is deliberate
         confirmation = input("Do you want to update the signature in the whitelist and proceed? [y/N]: ")
@@ -174,6 +169,5 @@ if __name__ == "__main__":
     else:
         print("[+] Cryptographic integrity validation correct.")
 
-    # Mediation and Launch Phase
     loadProfileArmor(app_name, path)
     safeExecution(path, arg_list)

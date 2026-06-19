@@ -1,4 +1,4 @@
-# ns-exec (Namespace Executor)
+# Unix Namespace Executor (ns-exec)
 
 A secure Python-based execution wrapper that add AppArmor profiles manually to allow trusted applications to use unprivileged user namespaces on hardened Linux systems (Tested on Kubuntu).
 
@@ -79,16 +79,22 @@ Note that in any case a terminal will be opened (and kept open) to authorize the
 
 ### Extract the Absolute Working Directory
 1. Open your terminal.
+
 2. Navigate to the directory where your `ns-exec` script is stored:
+
    ```bash
-   cd "/home/yos/Downloads/Clases/Seguridad/Proyecto final/ns-exec"
+   cd "/home/user/.../ns-exec"
    ```
+
 3. Execute the `pwd` command to obtain the absolute path of the folder:
+
    ```bash
    pwd
    ```
-   You will get something like `/home/User/Downloads/Final Project/ns-exec`
-4. **Important Notation Rule:** If the output path contains spaces (e.g., Final Project), you must wrap the script path in double quotes ("...") during the next configuration step.
+   You will get something like `/home/user/.../ns-exec`.
+
+4. Add `/ns-exec.py` at the end of `/home/user/.../ns-exec`. Result: `/home/user/.../ns-exec/ns-exec.py`.
+5. **Important:** If the output path contains spaces (e.g., Final Project), you must wrap the script path in simple or double quotes ("...") during the next configuration step.
 - If the path does not contain spaces, you can safely omit the quotes.
 
 ### Modify the Application shortcut
@@ -96,12 +102,13 @@ Note that in any case a terminal will be opened (and kept open) to authorize the
 
 2. Navigate to the Application tab and configure the following parameters explicitly:
 
-   - Program: sudo
+   - **Program:** sudo
 
-   - Arguments: "/home/yos/Downloads/Final Project/ns-exec/ns-exec.py" /usr/bin/google-chrome-stable %U 
+   - **Arguments:** "/home/user/.../ns-exec/ns-exec.py" /usr/bin/google-chrome %U 
 
-   - Working directory (optional): /home/User/Downloads/Final Project/ns-exec
-(Reference image)
+   - **Working directory (optional):** /home/User/Downloads/Final Project/ns-exec
 
-3. In the "Advanced" tab, check the box "Run in terminal"
-(Reference image)
+
+1. In the **"Advanced"** tab, check the box **"Run in terminal"**
+
+## Example video
