@@ -112,3 +112,5 @@ Note that in any case a terminal will be opened (and kept open) to authorize the
 1. In the **"Advanced"** tab, check the box **"Run in terminal"**
 
 ## Example video
+
+https://youtu.be/LwYcaYgTFm4
